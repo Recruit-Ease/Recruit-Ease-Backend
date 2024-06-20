@@ -8,4 +8,6 @@ urlpatterns = [
     path('logout/', CompanyLogoutView.as_view(), name='company-logout'),
     path('get-csrf-token/', GetCSRFToken.as_view(), name='get-csrf-token'),
     path('home/', home, name='home'),
+    path('new_posting/', create_posting, name='create-posting'),
+    path('postings/', get_postings, name='get-postings')
 ]

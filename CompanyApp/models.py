@@ -43,3 +43,11 @@ class Company(AbstractBaseUser):
     def is_staff(self):
         return self.is_admin
 
+class Posting(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title + self.created_at.strftime('%m-%Y')
