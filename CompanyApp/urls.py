@@ -9,5 +9,7 @@ urlpatterns = [
     path('get-csrf-token/', GetCSRFToken.as_view(), name='get-csrf-token'),
     path('home/', home, name='home'),
     path('new_posting/', create_posting, name='create-posting'),
-    path('postings/', get_postings, name='get-postings')
+    path('postings/', get_postings, name='get-postings'),
+    path('delete_posting/', delete_posting, name='delete-posting'),
+    path('update_posting/', update_posting, name='update-posting'),
 ]

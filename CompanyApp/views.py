@@ -26,3 +26,28 @@ def get_postings(request):
     postings = Posting.objects.filter(company=request.user)
     data = [{'id': encrypt(posting.id), 'title': posting.title, 'description': posting.description, 'company': posting.company.name, 'created_date': posting.created_at} for posting in postings]
     return Response({'data': data}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def delete_posting(request):
+    if request.method == 'POST':
+        posting_id = decrypt(request.data.get('id'))
+        posting = Posting.objects.get(id=posting_id)
+        posting.delete()
+        return Response({'data': 'Posting deleted successfully!'}, status=status.HTTP_200_OK)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_posting(request):
+    if request.method == 'PUT':
+        posting_id = decrypt(request.data.get('id'))
+        posting = Posting.objects.get(id=posting_id)
+        if not posting:
+            return Response({'data': 'Invalid Posting ID'}, status=status.HTTP_404_NOT_FOUND)
+        
+        for field, value in request.data.items():
+            if field != "id" and hasattr(posting, field):
+                setattr(posting, field, value)
+        posting.save()
+
+        return Response({'data': 'Posting updated successfully!'}, status=status.HTTP_200_OK)
