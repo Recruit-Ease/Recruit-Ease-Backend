@@ -10,6 +10,7 @@ urlpatterns = [
     path('home/', home, name='home'),
     path('new_posting/', create_posting, name='create-posting'),
     path('postings/', get_postings, name='get-postings'),
+    path('postings/<str:id>/', get_postings, name='get-posting'),
     path('delete_posting/', delete_posting, name='delete-posting'),
     path('update_posting/', update_posting, name='update-posting'),
 ]

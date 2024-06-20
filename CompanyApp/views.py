@@ -22,9 +22,13 @@ def create_posting(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_postings(request):
-    postings = Posting.objects.filter(company=request.user)
-    data = [{'id': encrypt(posting.id), 'title': posting.title, 'description': posting.description, 'company': posting.company.name, 'created_date': posting.created_at} for posting in postings]
+def get_postings(request, id=None):
+    if id:
+        posting_id = decrypt(id)
+        postings = Posting.objects.filter(id=posting_id)
+    else:
+        postings = Posting.objects.filter(company=request.user)
+    data = [{'id': encrypt(posting.id), 'title': posting.title, 'description': posting.description, 'company': posting.company.name, 'created_date': posting.created_at, 'is_active': posting.is_active} for posting in postings]
     return Response({'data': data}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
