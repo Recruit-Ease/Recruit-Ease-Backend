@@ -54,7 +54,14 @@ class Posting(models.Model):
     def __str__(self):
         return self.title + "-" + self.created_at.strftime('%m-%Y')
 
-class PostingForm(models.Model):
+class CandidateData(models.Model):
+    status_choices = [
+        ("Applicaton Submitted", "Application Submitted"),
+        ("Under Review", "Under Review"),
+        ("Accepted", "Accepted"),
+        ("Rejected", "Rejected"),
+    ]
+
     posting = models.ForeignKey(Posting, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
@@ -69,4 +76,5 @@ class PostingForm(models.Model):
     formal_questions = models.JSONField(null=True)
     behavioural_questions = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=50, choices=status_choices, default='Application Submitted')
     

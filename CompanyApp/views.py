@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
-from .models import Posting, PostingForm
+from .models import Posting, CandidateData
 from .utils import encrypt, decrypt
 
 @api_view(['GET'])
@@ -112,7 +112,7 @@ def save_candidateData(request):
         if request.method == 'POST':
             posting_id = decrypt(request.POST.get('posting_id'))
             posting = Posting.objects.get(id=posting_id)
-            postingForm = PostingForm.objects.create(posting=posting)
+            postingForm = CandidateData.objects.create(posting=posting)
             postingForm.first_name = request.POST.get('first_name')
             postingForm.last_name = request.POST.get('last_name')
             postingForm.email = request.POST.get('email')
@@ -138,7 +138,7 @@ def save_candidateData(request):
 @permission_classes([AllowAny])
 def get_candidateData(request):
     try:
-        candidateData = PostingForm.objects.all()
+        candidateData = CandidateData.objects.all()
 
         data = [{'id': encrypt(candidate.id), 'first_name': candidate.first_name, 'last_name': candidate.last_name, 'email': candidate.email, 'phone': candidate.phone, 'address': candidate.address, 'city': candidate.city, 'province': candidate.province, 'country': candidate.country, 'postal_code': candidate.postal_code, 'resume': candidate.resume.url, 'formal_questions': candidate.formal_questions, 'behavioural_questions': candidate.behavioural_questions, 'created_date': candidate.created_at} for candidate in candidateData]
         
