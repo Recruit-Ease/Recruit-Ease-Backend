@@ -42,11 +42,11 @@ def get_postings(request):
     except Exception as e:
         return Response({'data': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
+@api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_posting(request):
     try:
-        if request.method == 'POST':
+        if request.method == 'DELETE':
             posting_id = decrypt(request.data.get('id'))
             posting = Posting.objects.get(id=posting_id)
             if not posting:
@@ -102,7 +102,7 @@ def get_posting_details(request, id):
     except Exception as e:
         return Response({'data': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-### Views for PostingForm (CRUD)
+### Views for Candidate Data (CRUD)
 
 # View to save candidate data
 @api_view(['POST'])
@@ -140,8 +140,48 @@ def get_candidateData(request):
     try:
         candidateData = CandidateData.objects.all()
 
-        data = [{'id': encrypt(candidate.id), 'first_name': candidate.first_name, 'last_name': candidate.last_name, 'email': candidate.email, 'phone': candidate.phone, 'address': candidate.address, 'city': candidate.city, 'province': candidate.province, 'country': candidate.country, 'postal_code': candidate.postal_code, 'resume': candidate.resume.url, 'formal_questions': candidate.formal_questions, 'behavioural_questions': candidate.behavioural_questions, 'created_date': candidate.created_at} for candidate in candidateData]
+        data = [{'id': encrypt(candidate.id), 'first_name': candidate.first_name, 'last_name': candidate.last_name, 'email': candidate.email, 'phone': candidate.phone, 'address': candidate.address, 'city': candidate.city, 'province': candidate.province, 'country': candidate.country, 'postal_code': candidate.postal_code, 'resume': candidate.resume.url, 'formal_questions': candidate.formal_questions, 'behavioural_questions': candidate.behavioural_questions, "status": candidate.status, 'created_date': candidate.created_at} for candidate in candidateData]
         
         return Response({'data': data}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'data': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_candidateData(request):
+    try:
+        if request.method == 'DELETE':
+            candidateID_list = request.data.get('id')
+
+            if not isinstance(candidateID_list, list):
+                candidateID_list = [candidateID_list]
+            
+            print(candidateID_list)
+            for candidate_id in candidateID_list:
+                candidate_id = decrypt(candidate_id)
+                candidate = CandidateData.objects.get(id=candidate_id)
+                if not candidate:
+                    return Response({'data': 'Invalid Candidate ID'}, status=status.HTTP_404_NOT_FOUND)
+                
+                candidate.delete()
+
+            return Response({'data': 'Selected Candidates deleted successfully!'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'data': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def change_status(request):
+    try:
+        if request.method == 'PUT':
+            candidate_id = decrypt(request.data.get('id'))
+            candidate = CandidateData.objects.get(id=candidate_id)
+            if not candidate:
+                return Response({'data': 'Invalid Candidate ID'}, status=status.HTTP_404_NOT_FOUND)
+            
+            candidate.status = request.data.get('status')
+            candidate.save()
+
+            return Response({'data': 'Candidate status updated successfully!'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'data': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERRORs)
