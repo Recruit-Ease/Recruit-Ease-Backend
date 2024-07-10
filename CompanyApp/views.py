@@ -103,3 +103,19 @@ def update_posting(request):
             return Response({'message': 'Posting updated successfully', 'status': status.HTTP_200_OK})
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_posting(request):
+    try:
+        if request.method == 'DELETE':
+            posting_id = decrypt(request.data.get('id'))
+            posting = Posting.objects.get(id=posting_id)
+            if not posting:
+                return Response({'error': 'Posting Not Found', 'status': status.HTTP_404_NOT_FOUND})
+            
+            posting.delete()
+            return Response({'message': 'Posting deleted successfully', 'status': status.HTTP_200_OK})
+
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
