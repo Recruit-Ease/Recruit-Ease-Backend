@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'CompanyApp'
+    'CompanyApp',
+    'corsheaders'
 ]
 
 # REST_FRAMEWORK = {
@@ -69,6 +70,7 @@ AUTHENTICATION_BACKENDS = (
 AUTH_USER_MODEL = 'CompanyApp.Company'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -77,6 +79,47 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Allow all origins (not recommended for production)
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Allow specific origins
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    # "http://your-frontend-domain.com",
+]
+
+# Allow all methods
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+# Allow all headers
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+# Allow credentials
+CORS_ALLOW_CREDENTIALS = True
+
+# # Allow specific origins regex
+# CORS_ALLOWED_ORIGIN_REGEXES = [
+#     r"^https://\w+\.yourdomain\.com$",
+# ]
 
 ROOT_URLCONF = 'RecruitEase.urls'
 
@@ -149,6 +192,13 @@ STATIC_URL = 'static/'
 # Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'jimmyand623@gmail.com'
+# EMAIL_HOST_PASSWORD = 'Jimmyanderson@623'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
