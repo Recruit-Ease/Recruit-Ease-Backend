@@ -12,4 +12,5 @@ urlpatterns = [
     # CRUD operations for Posting
     path('new_posting/', create_posting, name='create-posting'),
     path('postings/', get_postings, name='get-postings'),
+    path('update_posting/', update_posting, name='update-posting'),
 ]
