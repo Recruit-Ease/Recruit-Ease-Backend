@@ -45,3 +45,42 @@ def create_posting(request):
     except Exception as e:
         print(e)
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_postings(request):
+    try:
+        id = request.GET.get('id')
+        if id:
+            postings = Posting.objects.filter(id=decrypt(id))
+        else:
+            postings = Posting.objects.filter(company=request.user)
+            
+        data = []
+        for posting in postings:
+            data.append({
+                'id': encrypt(posting.id),
+                'title': posting.title,
+                'department': posting.department,
+                'city': posting.city,
+                'country': posting.country,
+                'posting_date': posting.posting_date,
+                'expiration_date': posting.expiration_date,
+                'soft_skills': posting.soft_skills,
+                'technical_skills': posting.technical_skills,
+                'questions': posting.questions,
+                'recruiter_name': posting.recruiter_name,
+                'recruiter_email': posting.recruiter_email,
+                'about_job': posting.about_job,
+                'about_company': posting.about_company,
+                'qualification': posting.qualification,
+                'key_requirements': posting.key_requirements,
+                'nice_to_have': posting.nice_to_have,
+                'other_remarks': posting.other_remarks,
+                'is_active': posting.is_active,
+                'form_url': posting.form_url
+            })
+
+        return Response({'data': data, 'message': 'Postings Received Successfully', 'status': status.HTTP_200_OK})
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
