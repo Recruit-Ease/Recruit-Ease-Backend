@@ -11,16 +11,4 @@ urlpatterns = [
     
     # CRUD operations for Posting
     path('new_posting/', create_posting, name='create-posting'),
-    path('postings/', get_postings, name='get-postings'),
-    path('delete_posting/', delete_posting, name='delete-posting'),
-    path('update_posting/', update_posting, name='update-posting'),
-
-    # Get a Posting Details to Create Form
-    path('apply/<str:id>/', get_posting_details, name='get-posting-details'),
-
-    # CRUD operations for PostingForm
-    path('save_candidateData/', save_candidateData, name='save-candidateData'),
-    path('candidate_data/', get_candidateData, name='get-candidateData'),
-    path('delete_candidateData/', delete_candidateData, name='delete-candidateData'),
-    path('change_status/', change_status, name='change-status'),
 ]
