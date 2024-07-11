@@ -14,4 +14,7 @@ urlpatterns = [
     path('postings/', get_postings, name='get-postings'),
     path('update_posting/', update_posting, name='update-posting'),
     path('delete_posting/', delete_posting, name='delete-posting'),
+
+    # Get a Posting Details to Create Form
+    path('apply/<str:id>/', get_posting_details, name='get-posting-details'),
 ]
