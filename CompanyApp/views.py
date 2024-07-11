@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
-from .models import Posting
+from .models import Posting, CandidateData
 from .utils import encrypt, decrypt
 
 @api_view(['GET'])
@@ -159,3 +159,34 @@ def get_posting_details(request, id):
         return Response({'data': data, 'message': 'Posting Data Received Sucessfully', 'status': status.HTTP_200_OK})
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+
+
+# Views for Candidate Data (CRUD)
+
+# View to save candidate data
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def save_candidateData(request):
+    try:
+        if request.method == 'POST':
+            posting_id = decrypt(request.data.get('posting_id'))
+            posting = Posting.objects.get(id=posting_id)
+            candidateData = CandidateData.objects.create(posting=posting)
+            candidateData.first_name = request.data.get('first_name')
+            candidateData.last_name = request.data.get('last_name')
+            candidateData.email = request.data.get('email')
+            candidateData.phone = request.data.get('phone')
+            candidateData.address = request.data.get('address')
+            candidateData.city = request.data.get('city')
+            candidateData.province = request.data.get('province')
+            candidateData.country = request.data.get('country')
+            candidateData.postal_code = request.data.get('postal_code')
+            candidateData.resume = request.FILES.get('resume')
+            candidateData.questions = request.data.get('questions')
+
+            candidateData.save()
+
+            return Response({'message': 'Candidate data saved successfully', 'status': status.HTTP_201_CREATED})
+    except Exception as e:
+        return Response({'error': "Internal Server Error", 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+
