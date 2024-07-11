@@ -247,3 +247,20 @@ def delete_candidateData(request):
             return Response({'message': 'Selected candidates deleted successfully', 'status': status.HTTP_200_OK})
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def change_status(request):
+    try:
+        if request.method == 'PUT':
+            candidate_id = decrypt(request.data.get('id'))
+            candidate = CandidateData.objects.get(id=candidate_id)
+            if not candidate:
+                return Response({'error': 'Candidate not found', 'status': status.HTTP_404_NOT_FOUND})
+            
+            candidate.status = request.data.get('status')
+            candidate.save()
+
+            return Response({'message': 'Candidate status updated successfully', 'status': status.HTTP_200_OK})
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_INTERNAL_SERVER_ERROR})
