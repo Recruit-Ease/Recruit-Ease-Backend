@@ -17,5 +17,6 @@ urlpatterns = [
 
     # Get a Posting Details to Create Form
     path('apply/<str:id>/', get_posting_details, name='get-posting-details'),
-    path('save_candidateData/', save_candidateData, name='save-candidateData'),
+    path('new_candidate/', save_candidateData, name='save-candidateData'),
+    path('candidates/', get_candidateData, name='get-candidateData'),
 ]

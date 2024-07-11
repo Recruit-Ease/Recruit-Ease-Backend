@@ -190,3 +190,39 @@ def save_candidateData(request):
     except Exception as e:
         return Response({'error': "Internal Server Error", 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
 
+# View to get a Candidate Details
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_candidateData(request):
+    try:
+        id = request.GET.get('id')
+        if id:
+            candidateData = CandidateData.objects.filter(id=decrypt(id))
+        else:
+            candidateData = CandidateData.objects.all()
+
+        data = []
+        for candidate in candidateData:
+            data.append({
+                'id': encrypt(candidate.id),
+                'posting_id': encrypt(candidate.posting.id),
+                'first_name': candidate.first_name,
+                'last_name': candidate.last_name,
+                'email': candidate.email,
+                'phone': candidate.phone,
+                'address': candidate.address,
+                'city': candidate.city,
+                'province': candidate.province,
+                'country': candidate.country,
+                'postal_code': candidate.postal_code,
+                'resume': candidate.resume.url,
+                'questions': candidate.questions,
+                'created_at': candidate.created_at,
+                'status': candidate.status
+            })
+        
+        return Response({'data': data, 'message': 'candidate data received successfully', 'status': status.HTTP_200_OK})
+
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+
