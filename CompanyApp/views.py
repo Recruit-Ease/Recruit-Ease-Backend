@@ -226,3 +226,24 @@ def get_candidateData(request):
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
 
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_candidateData(request):
+    try:
+        if request.method == 'DELETE':
+            candidateID_list = request.data.get('id')
+
+            if not isinstance(candidateID_list, list):
+                candidateID_list = [candidateID_list]
+            
+            for candidate_id in candidateID_list:
+                candidate_id = decrypt(candidate_id)
+                candidate = CandidateData.objects.get(id=candidate_id)
+                if not candidate:
+                    return Response({'error': 'Candidate not found', 'status': status.HTTP_404_NOT_FOUND})
+                
+                candidate.delete()
+
+            return Response({'message': 'Selected candidates deleted successfully', 'status': status.HTTP_200_OK})
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
