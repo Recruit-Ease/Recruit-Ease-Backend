@@ -128,3 +128,48 @@ def get_postings(request):
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
 
+@api_view(['PUT'])
+def update_posting(request):
+    try:
+        if request.method == 'PUT':
+            response, isAuthenticated = get_company(request)
+
+            if not isAuthenticated:
+                return Response(response)
+            
+            company = response
+            posting_id = decrypt(request.data.get('id'))
+            posting = Posting.objects.get(id=posting_id)
+            if not posting:
+                return Response({'error': 'Posting not found', 'status': status.HTTP_404_NOT_FOUND})
+            
+            for field, value in request.data.items():
+                if field != "id" and hasattr(posting, field):
+                    setattr(posting, field, value)
+            posting.save()
+
+            return Response({'message': 'Posting updated successfully', 'status': status.HTTP_200_OK})
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+
+@api_view(['DELETE'])
+def delete_posting(request):
+    try:
+        if request.method == 'DELETE':
+            response, isAuthenticated = get_company(request)
+
+            if not isAuthenticated:
+                return Response(response)
+            
+            company = response
+            posting_id = decrypt(request.data.get('id'))
+            posting = Posting.objects.get(id=posting_id)
+            if not posting:
+                return Response({'error': 'Posting Not Found', 'status': status.HTTP_404_NOT_FOUND})
+            
+            posting.delete()
+            return Response({'message': 'Posting deleted successfully', 'status': status.HTTP_200_OK})
+
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+
