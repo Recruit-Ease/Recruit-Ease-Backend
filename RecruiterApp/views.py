@@ -4,7 +4,7 @@ from rest_framework import status
 from .models import Posting
 from .serializers import CompanySerializer
 from .utils import get_company, encrypt, decrypt
-
+# Testing ...
 @api_view(['POST'])
 def register_view(request):
     try:
