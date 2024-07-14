@@ -4,7 +4,7 @@ from rest_framework import status
 from .models import Posting
 from .serializers import CompanySerializer
 from .utils import get_company, encrypt, decrypt
-# Testing ...
+
 @api_view(['POST'])
 def register_view(request):
     try:
@@ -173,3 +173,41 @@ def delete_posting(request):
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
 
+# # Views for Candidate Form (CRUD)
+
+# View to get a Posting Details to Create Form
+@api_view(['GET'])
+def get_posting_details(request, id):
+    try:
+        posting_id = decrypt(id)
+        posting = Posting.objects.get(id=posting_id, is_active=True)
+
+        if not posting:
+            return Response({'error': 'Posting not found', 'status': status.HTTP_404_NOT_FOUND})
+        
+        data = {
+            'id': encrypt(posting.id),
+            'title': posting.title,
+            'department': posting.department,
+            'city': posting.city,
+            'country': posting.country,
+            'posting_date': posting.posting_date,
+            'expiration_date': posting.expiration_date,
+            'soft_skills': posting.soft_skills,
+            'technical_skills': posting.technical_skills,
+            'questions': posting.questions,
+            'recruiter_name': posting.recruiter_name,
+            'recruiter_email': posting.recruiter_email,
+            'about_job': posting.about_job,
+            'about_company': posting.about_company,
+            'qualification': posting.qualification,
+            'key_requirements': posting.key_requirements,
+            'nice_to_have': posting.nice_to_have,
+            'other_remarks': posting.other_remarks,
+            'is_active': posting.is_active,
+            'form_url': posting.form_url
+        }
+
+        return Response({'data': data, 'message': 'Posting Data Received Sucessfully', 'status': status.HTTP_200_OK})
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
