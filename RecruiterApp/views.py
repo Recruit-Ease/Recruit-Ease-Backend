@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Company
 from .serializers import CompanySerializer
-from RecruitEase.utils import get_company
+from .utils import get_company
 
 @api_view(['POST'])
 def register_view(request):
