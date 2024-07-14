@@ -238,7 +238,7 @@ def save_candidateData(request):
     except Exception as e:
         return Response({'error': "Internal Server Error", 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
 
-# View to get the candidate data
+# View to get the candidate data for a posting
 @api_view(['GET'])
 def get_candidateData(request):
     try:
