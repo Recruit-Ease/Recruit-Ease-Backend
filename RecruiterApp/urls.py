@@ -16,5 +16,5 @@ urlpatterns = [
     path('new_candidate/', save_candidateData, name='save-candidateData'),
     path('candidates/', get_candidateData, name='get-candidateData'),
     path('delete_candidate/', delete_candidateData, name='delete-candidateData'),
-    # path('change_status/', change_status, name='change-status'),
+    path('change_status/', change_status, name='change-status'),
 ]
