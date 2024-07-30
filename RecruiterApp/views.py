@@ -190,7 +190,7 @@ def get_posting_details(request, id):
             'city': posting.city,
             'country': posting.country,
             'posting_date': posting.posting_date,
-            'expiration_date': posting.expiration_date,
+            'deadline': posting.expiration_date,
             'soft_skills': posting.soft_skills,
             'technical_skills': posting.technical_skills,
             'questions': posting.questions,
