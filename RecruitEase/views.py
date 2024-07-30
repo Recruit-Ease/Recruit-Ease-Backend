@@ -22,6 +22,8 @@ def company_login_view(request):
                 is_company = False
             else:
                 is_company = True
+            
+            user = user[0]
         except Exception as e:
             return Response({'error': 'Invalid Email Address', 'status': status.HTTP_400_BAD_REQUEST})
         

@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CandidateSerializer
+from .utils import get_candidate
 
 @api_view(['POST'])
 def register_view(request):
@@ -15,15 +16,15 @@ def register_view(request):
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# @api_view(['GET'])
-# def home_view(request):
-#     try:
-#         # response, isAuthenticated = get_company(request)
+@api_view(['GET'])
+def home_view(request):
+    try:
+        response, isAuthenticated = get_candidate(request)
 
-#         if not isAuthenticated:
-#             return Response(response)
+        if not isAuthenticated:
+            return Response(response)
     
-#         company = response
-#         return Response({'data': {'company_name': company.name}, 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
-#     except Exception as e:
-#         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        candidate = response
+        return Response({'data': {'candidate_name': candidate.name}, 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
