@@ -24,4 +24,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', company_login_view, name='login'),
     path('api/', include('RecruiterApp.urls')),
+    path('api/candidate/', include('CandidateApp.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
