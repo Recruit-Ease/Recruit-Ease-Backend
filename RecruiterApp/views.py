@@ -31,7 +31,6 @@ def logout_view(request):
         return Response({'message': 'Logged out successfully', 'status': status.HTTP_200_OK})
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
-    
 
 # This is just for testing purposes
 @api_view(['GET'])
@@ -43,7 +42,6 @@ def home_view(request):
     
     company = response
     return Response({'data': {'company_name': company.name}, 'status': status.HTTP_200_OK})
-
 
 ### Views for Posting (CRUD)
 
@@ -108,7 +106,7 @@ def get_postings(request):
                 'city': posting.city,
                 'country': posting.country,
                 'posting_date': posting.posting_date,
-                'expiration_date': posting.expiration_date,
+                'deadline': posting.expiration_date,
                 'soft_skills': posting.soft_skills,
                 'technical_skills': posting.technical_skills,
                 'questions': posting.questions,
