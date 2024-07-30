@@ -16,6 +16,21 @@ def register_view(request):
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['POST'])
+def logout_view(request):
+    try:
+        response, isAuthenticated = get_candidate(request)
+
+        if not isAuthenticated:
+            return Response(response)
+
+        candidate = response
+        candidate.refresh_token = None
+        candidate.save()
+        return Response({'message': 'Logged out successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['GET'])
 def home_view(request):
     try:
