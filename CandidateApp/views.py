@@ -14,3 +14,16 @@ def register_view(request):
         return Response({'error': serializer.errors, 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# @api_view(['GET'])
+# def home_view(request):
+#     try:
+#         # response, isAuthenticated = get_company(request)
+
+#         if not isAuthenticated:
+#             return Response(response)
+    
+#         company = response
+#         return Response({'data': {'company_name': company.name}, 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+#     except Exception as e:
+#         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
