@@ -122,6 +122,9 @@ def get_postings(request):
                 'form_url': posting.form_url
             })
 
+        if id:
+            data = data[0]
+
         return Response({'data': data, 'message': 'Postings Received Successfully', 'status': status.HTTP_200_OK})
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
