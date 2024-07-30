@@ -3,10 +3,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CandidateSerializer
 from .utils import get_candidate
+from RecruiterApp.models import Company
+from .models import Candidate
 
 @api_view(['POST'])
 def register_view(request):
     try:
+        email = request.data.get('email')
+        if Company.objects.filter(email=email.lower()).exists() or Candidate.objects.filter(email=email.lower()).exists():
+            return Response({'error': 'User with this email already exists ---', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = CandidateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
