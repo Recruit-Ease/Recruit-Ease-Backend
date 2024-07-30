@@ -29,7 +29,7 @@ def company_login_view(request):
         
         if user.check_password(password):
             user.generate_refresh_token()
-            return Response({'refresh_token': user.refresh_token, 'is_company': is_company, 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+            return Response({'refresh_token': user.refresh_token, 'is_company': is_company, 'name': user.name, 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid Credentials', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
