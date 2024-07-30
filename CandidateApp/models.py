@@ -3,7 +3,6 @@ from django.db import models
 class Candidate(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
-    address = models.TextField()
     password = models.CharField(max_length=255)
     refresh_token = models.CharField(max_length=255, blank=True, null=True)
 
