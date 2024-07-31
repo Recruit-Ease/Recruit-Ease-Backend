@@ -16,13 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .views import company_login_view
+from .views import company_login_view, forgot_password_view, reset_password
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', company_login_view, name='login'),
+    path('forgot_password/', forgot_password_view, name='forgot_password'),
+    path('reset_password/', reset_password, name='reset_password'),
     path('api/', include('RecruiterApp.urls')),
     path('api/candidate/', include('CandidateApp.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
