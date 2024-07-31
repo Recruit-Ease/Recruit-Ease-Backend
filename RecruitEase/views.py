@@ -1,6 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.cache import cache
+from .utils import send_otp_via_email
 from RecruiterApp.models import Company
 from CandidateApp.models import Candidate
 import uuid
@@ -39,47 +41,41 @@ def company_login_view(request):
 @api_view(['POST'])
 def forgot_password_view(request):
     try:
-       email = request.data.get('email')
+        email = request.data.get('email')
 
-       if Company.objects.filter(email=email).exists() or Candidate.objects.filter(email=email).exists():
-           request.session[f'temp_id_{email}'] = str(uuid.uuid4())
-           data = {
-               'email': email,
-                'temp_id': request.session[f'temp_id_{email}']
-           }
-           return Response({'message': 'Email Verified Successfully', 'data': data,'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
-       
-       return Response({'error': 'Invalid Email Address', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
+        if Company.objects.filter(email=email).exists() or Candidate.objects.filter(email=email).exists():
+            otp = send_otp_via_email(email)
+            cache.set(f'otp_{email}', otp, timeout=300)  # Cache OTP for 5 minutes
+
+            return Response({'success': True, 'message': 'OTP sent successfully', "status":status.HTTP_200_OK}, status=status.HTTP_200_OK)
+        
+        return Response({'error': 'Invalid Email Address', "status":status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+        print(e)
+        return Response({'error': 'Internal Server Error',"status":status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['POST'])
 def reset_password(request):
     try:
         email = request.data.get('email')
-        temp_id = request.data.get('temp_id')
+        otp = request.data.get('otp')
         password = request.data.get('password')
-        confirm_password = request.data.get('confirm_password')
 
-        if request.session[f'temp_id_{email}'] != temp_id:
-            return Response({'error': 'Bad Request', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
+        cached_otp = cache.get(f'otp_{email}')
+        if not cached_otp or cached_otp != int(otp):
+            return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if password != confirm_password:
-            return Response({'error': 'Passwords do not match', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
-        
         user = None
         if Company.objects.filter(email=email).exists():
             user = Company.objects.get(email=email)
         elif Candidate.objects.filter(email=email).exists():
             user = Candidate.objects.get(email=email)
 
-        
         user.set_password(password)
         user.save()
 
-        del request.session[f'temp_id_{email}']
-        
-        return Response({'message': 'Password Reset Successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+        cache.delete(f'otp_{email}')
+
+        return Response({'success': True, 'message': 'Password Reset Successfully'}, status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+        return Response({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
