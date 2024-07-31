@@ -2,3 +2,8 @@
 db.sqlite3
 migrations/
 media/
+
+__pycache__/
+*.pyc
+.DS_Store
+.env
