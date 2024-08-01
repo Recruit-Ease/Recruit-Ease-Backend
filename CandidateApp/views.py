@@ -107,44 +107,49 @@ def get_application(request):
 
         if not isAuthenticated:
             return Response(response)
-        
+
         candidate = response
-        
+
         application_id = request.GET.get('application_id')
+
+        print("Application ID: ", application_id)
         if application_id:
-            application = Application.objects.filter(id=decrypt(id))
+            try:
+                application_id = decrypt(application_id)
+                application = Application.objects.filter(id=application_id)
+            except Exception as e:
+                return Response({'error': 'Invalid application_id', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
         else:
             application = Application.objects.filter(candidate=candidate)
 
-        data = []
-        for app in application:
-            candidateProfile = CandidateProfile.objects.get(candidate=app.candidate)
-            data.append({
-                'application_id': encrypt(app.id),
-                'posting_id': encrypt(app.posting.id),
-                'company_name': app.posting.company.name,
-                'job_title': app.posting.title,
-                'location': app.posting.company.address,
-                'first_name': candidateProfile.first_name,
-                'last_name': candidateProfile.last_name,
-                'email': app.candidate.email,
-                'phone': candidateProfile.phone,
-                'address': candidateProfile.address,
-                'city': candidateProfile.city,
-                'province': candidateProfile.province,
-                'country': candidateProfile.country,
-                'postal_code': candidateProfile.postal_code,
-                'resume': app.resume,
-                'legal_questions': app.legal_questions,
-                'questions': app.questions,
-                'created_at': app.created_at,
-                'status': app.status
-            })
-        
-        if application_id:
-            data = data[0]
-
-        return Response({'data': data, 'message': 'Application Data Received successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+        if application.exists():
+            data = []
+            for app in application:
+                candidateProfile = CandidateProfile.objects.get(candidate=app.candidate)
+                data.append({
+                    'application_id': encrypt(app.id),
+                    'posting_id': encrypt(app.posting.id),
+                    'company_name': app.posting.company.name,
+                    'job_title': app.posting.title,
+                    'location': app.posting.company.address,
+                    'first_name': candidateProfile.first_name,
+                    'last_name': candidateProfile.last_name,
+                    'email': app.candidate.email,
+                    'phone': candidateProfile.phone,
+                    'address': candidateProfile.address,
+                    'city': candidateProfile.city,
+                    'province': candidateProfile.province,
+                    'country': candidateProfile.country,
+                    'postal_code': candidateProfile.postal_code,
+                    'resume': app.resume,
+                    'legal_questions': app.legal_questions,
+                    'questions': app.questions,
+                    'created_at': app.created_at,
+                    'status': app.status
+                })
+            return Response({'data': data, 'message': 'Application Data Received successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'No applications found', 'status': status.HTTP_404_NOT_FOUND}, status=status.HTTP_404_NOT_FOUND)
 
     except Exception as e:
         print(e)

@@ -30,3 +30,22 @@ def get_company(request):
             return ({'error': 'Invalid Token', 'status': status.HTTP_400_BAD_REQUEST}, False)
     except Exception as e:
         return ({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, False)
+    
+
+
+from django.core.mail import send_mail
+from django.conf import settings
+
+def send_email_update(to, subject, message):
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [to]
+
+    send_mail(
+        subject,
+        message,
+        email_from,
+        recipient_list,
+        fail_silently=False,
+        html_message=message  # Add HTML content support
+    )
+    return True
