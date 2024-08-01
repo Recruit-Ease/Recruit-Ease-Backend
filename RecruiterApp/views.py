@@ -272,6 +272,29 @@ def get_application(request):
         print(e)
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['DELETE'])
+def delete_application(request):
+    try:
+        response, isAuthenticated = get_company(request)
+
+        if not isAuthenticated:
+            return Response(response)
+        
+        company = response
+        if request.method == 'DELETE':
+            application_id = request.data.get('application_id')
+
+            application_id = decrypt(application_id)
+            application = Application.objects.filter(id=application_id)
+            if not application.exists():
+                return Response({'error': 'Application not found', 'status': status.HTTP_404_NOT_FOUND}, status=status.HTTP_404_NOT_FOUND)
+                
+            application.delete()
+
+            return Response({'message': 'Application deleted successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['PUT'])
 def change_status(request):
     try:

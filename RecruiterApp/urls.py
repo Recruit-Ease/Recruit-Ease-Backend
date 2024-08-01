@@ -13,6 +13,7 @@ urlpatterns = [
     path('delete_posting/', delete_posting, name='delete-posting'),
 
     path('applications/', get_application, name='get-applications'),
+    path('delete_application/', delete_application, name='delete-application'),
 
     path('apply/<str:id>/', get_posting_details, name='get-posting-details'),
     path('change_status/', change_status, name='change-status'),
