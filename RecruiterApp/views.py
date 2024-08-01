@@ -221,6 +221,80 @@ def get_posting_details(request, id):
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
 
+# View to get the candidate data for a posting
+@api_view(['GET'])
+def get_application(request):
+    try:
+        response, isAuthenticated = get_company(request)
+
+        if not isAuthenticated:
+            return Response(response)
+        
+        company = response
+        
+        application_id = request.GET.get('application_id')
+        posting_id = request.GET.get('posting_id')
+        if application_id:
+            application = Application.objects.filter(id=decrypt(application_id))
+        elif posting_id:
+            application = Application.objects.filter(posting_id=decrypt(posting_id))
+        else:
+            application = Application.objects.filter(posting__company=company)
+
+        data = []
+        for app in application:
+            candidateProfile = CandidateProfile.objects.get(candidate=app.candidate)
+            data.append({
+                'application_id': encrypt(app.id),
+                'posting_id': encrypt(app.posting.id),
+                'first_name': candidateProfile.first_name,
+                'last_name': candidateProfile.last_name,
+                'email': app.candidate.email,
+                'phone': candidateProfile.phone,
+                'address': candidateProfile.address,
+                'city': candidateProfile.city,
+                'province': candidateProfile.province,
+                'country': candidateProfile.country,
+                'postal_code': candidateProfile.postal_code,
+                'resume': app.resume,
+                'legal_questions': app.legal_questions,
+                'questions': app.questions,
+                'created_at': app.created_at,
+                'status': app.status
+            })
+        
+        if application_id:
+            data = data[0]
+        
+        return Response({'data': data, 'message': 'Applications Received successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['DELETE'])
+def delete_application(request):
+    try:
+        response, isAuthenticated = get_company(request)
+
+        if not isAuthenticated:
+            return Response(response)
+        
+        company = response
+        if request.method == 'DELETE':
+            application_id = request.data.get('application_id')
+
+            application_id = decrypt(application_id)
+            application = Application.objects.filter(id=application_id)
+            if not application.exists():
+                return Response({'error': 'Application not found', 'status': status.HTTP_404_NOT_FOUND}, status=status.HTTP_404_NOT_FOUND)
+                
+            application.delete()
+
+            return Response({'message': 'Application deleted successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['PUT'])
 def change_status(request):
     try:
