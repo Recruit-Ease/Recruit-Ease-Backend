@@ -4,7 +4,9 @@ from rest_framework import status
 from .serializers import CandidateSerializer
 from .utils import get_candidate
 from RecruiterApp.models import Company
-from .models import Candidate
+from .models import Candidate, CandidateProfile
+from RecruiterApp.models import Posting, Application
+from RecruiterApp.utils import decrypt, encrypt
 
 @api_view(['POST'])
 def register_view(request):
@@ -48,4 +50,99 @@ def home_view(request):
         candidate = response
         return Response({'data': {'candidate_name': candidate.name}, 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
     except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# View to save the data candidate fills
+@api_view(['POST'])
+def save_application(request):
+    try:
+        response, isAuthenticated = get_candidate(request)
+
+        if not isAuthenticated:
+            return Response(response)
+        
+        candidate = response
+
+        if request.method == 'POST':
+            posting_id = decrypt(request.data.get('posting_id'))
+            posting = Posting.objects.get(id=posting_id)
+            application = Application.objects.create(posting=posting, candidate=candidate)
+            print("Application: ", application)
+
+            candidateProfile = CandidateProfile.objects.filter(candidate=candidate)
+            print("Candidate Profile: ", candidateProfile)
+            cp = None
+            if candidateProfile.exists():
+                print("Candidate Profile Exists")
+                cp = candidateProfile.first()
+            else:
+                cp = CandidateProfile.objects.create(candidate=candidate)
+            
+            cp.first_name = request.data.get('first_name')
+            cp.last_name = request.data.get('last_name')
+            cp.phone = request.data.get('phone')
+            cp.address = request.data.get('address')
+            cp.city = request.data.get('city')
+            cp.province = request.data.get('province')
+            cp.country = request.data.get('country')
+            cp.postal_code = request.data.get('postal_code')
+            cp.save()
+
+            application.legal_questions = request.data.get('legal_questions')
+            application.questions = request.data.get('questions')
+            application.resume = request.data.get('resume')
+
+            application.save()
+
+            return Response({'message': 'Application saved successfully', 'status': status.HTTP_201_CREATED}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print("Error: ", e)
+        return Response({'error': "Internal Server Error", 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# View to get the candidate data for a posting
+@api_view(['GET'])
+def get_application(request):
+    try:
+        response, isAuthenticated = get_candidate(request)
+
+        if not isAuthenticated:
+            return Response(response)
+        
+        candidate = response
+        
+        application_id = request.GET.get('application_id')
+        if application_id:
+            application = Application.objects.filter(id=decrypt(id))
+        else:
+            application = Application.objects.filter(candidate=candidate)
+
+        data = []
+        for app in application:
+            candidateProfile = CandidateProfile.objects.get(candidate=app.candidate)
+            data.append({
+                'application_id': encrypt(app.id),
+                'posting_id': encrypt(app.posting.id),
+                'first_name': candidateProfile.first_name,
+                'last_name': candidateProfile.last_name,
+                'email': app.candidate.email,
+                'phone': candidateProfile.phone,
+                'address': candidateProfile.address,
+                'city': candidateProfile.city,
+                'province': candidateProfile.province,
+                'country': candidateProfile.country,
+                'postal_code': candidateProfile.postal_code,
+                'resume': app.resume,
+                'legal_questions': app.legal_questions,
+                'questions': app.questions,
+                'created_at': app.created_at,
+                'status': app.status
+            })
+        
+        if application_id:
+            data = data[0]
+
+        return Response({'data': data, 'message': 'Application Data Received successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print(e)
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

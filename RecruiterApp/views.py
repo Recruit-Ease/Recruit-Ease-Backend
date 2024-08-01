@@ -1,11 +1,11 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Posting, CandidateData
+from .models import Posting, Application
 from .serializers import CompanySerializer
 from .utils import get_company, encrypt, decrypt
 from .models import Company
-from CandidateApp.models import Candidate
+from CandidateApp.models import Candidate, CandidateProfile
 
 @api_view(['POST'])
 def register_view(request):
@@ -82,7 +82,9 @@ def create_posting(request):
             posting.form_url = f"apply/{encrypt(posting.id)}/"
             posting.save()
 
-            return Response({'message': 'Posting created successfully!', 'status': status.HTTP_201_CREATED})
+            return Response({'message': 'Posting created successfully!',
+                             'posting_link':posting.form_url,
+                             'status': status.HTTP_201_CREATED})
 
         return Response({'error': 'Invalid request method', 'status': status.HTTP_400_BAD_REQUEST})
     except Exception as e:
@@ -125,7 +127,7 @@ def get_postings(request):
                 'nice_to_have': posting.nice_to_have,
                 'other_remarks': posting.other_remarks,
                 'is_active': posting.is_active,
-                'form_url': posting.form_url
+                'posting_link': posting.form_url
             })
 
         if id:
@@ -212,109 +214,10 @@ def get_posting_details(request, id):
             'nice_to_have': posting.nice_to_have,
             'other_remarks': posting.other_remarks,
             'is_active': posting.is_active,
-            'form_url': posting.form_url
+            'posting_link': posting.form_url
         }
 
         return Response({'data': data, 'message': 'Posting Data Received Sucessfully', 'status': status.HTTP_200_OK})
-    except Exception as e:
-        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
-
-# View to save the data candidate fills
-@api_view(['POST'])
-def save_candidateData(request):
-    try:
-        if request.method == 'POST':
-            posting_id = decrypt(request.data.get('posting_id'))
-            posting = Posting.objects.get(id=posting_id)
-            candidateData = CandidateData.objects.create(posting=posting)
-            candidateData.first_name = request.data.get('first_name')
-            candidateData.last_name = request.data.get('last_name')
-            candidateData.email = request.data.get('email')
-            candidateData.phone = request.data.get('phone')
-            candidateData.address = request.data.get('address')
-            candidateData.city = request.data.get('city')
-            candidateData.province = request.data.get('province')
-            candidateData.country = request.data.get('country')
-            candidateData.postal_code = request.data.get('postal_code')
-            candidateData.resume = request.FILES.get('resume')
-            candidateData.questions = request.data.get('questions')
-
-            candidateData.save()
-
-            return Response({'message': 'Candidate data saved successfully', 'status': status.HTTP_201_CREATED})
-    except Exception as e:
-        return Response({'error': "Internal Server Error", 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
-
-# View to get the candidate data for a posting
-@api_view(['GET'])
-def get_candidateData(request):
-    try:
-        response, isAuthenticated = get_company(request)
-
-        if not isAuthenticated:
-            return Response(response)
-        
-        company = response
-        
-        id = request.GET.get('id')
-        posting_id = request.GET.get('posting_id')
-        if id:
-            candidateData = CandidateData.objects.filter(id=decrypt(id))
-        elif posting_id:
-            candidateData = CandidateData.objects.filter(posting_id=decrypt(posting_id))
-        else:
-            candidateData = CandidateData.objects.filter(posting__company=company)
-
-        data = []
-        for candidate in candidateData:
-            data.append({
-                'id': encrypt(candidate.id),
-                'posting_id': encrypt(candidate.posting.id),
-                'first_name': candidate.first_name,
-                'last_name': candidate.last_name,
-                'email': candidate.email,
-                'phone': candidate.phone,
-                'address': candidate.address,
-                'city': candidate.city,
-                'province': candidate.province,
-                'country': candidate.country,
-                'postal_code': candidate.postal_code,
-                'resume': candidate.resume.url,
-                'questions': candidate.questions,
-                'created_at': candidate.created_at,
-                'status': candidate.status
-            })
-        
-        return Response({'data': data, 'message': 'candidate data received successfully', 'status': status.HTTP_200_OK})
-
-    except Exception as e:
-        print(e)
-        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
-
-@api_view(['DELETE'])
-def delete_candidateData(request):
-    try:
-        response, isAuthenticated = get_company(request)
-
-        if not isAuthenticated:
-            return Response(response)
-        
-        company = response
-        if request.method == 'DELETE':
-            candidateID_list = request.data.get('id')
-
-            if not isinstance(candidateID_list, list):
-                candidateID_list = [candidateID_list]
-            
-            for candidate_id in candidateID_list:
-                candidate_id = decrypt(candidate_id)
-                candidate = CandidateData.objects.get(id=candidate_id)
-                if not candidate:
-                    return Response({'error': 'Candidate not found', 'status': status.HTTP_404_NOT_FOUND})
-                
-                candidate.delete()
-
-            return Response({'message': 'Selected candidates deleted successfully', 'status': status.HTTP_200_OK})
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
 
@@ -329,7 +232,7 @@ def change_status(request):
             
             company = response
             candidate_id = decrypt(request.data.get('id'))
-            candidate = CandidateData.objects.get(id=candidate_id)
+            candidate = Application.objects.get(id=candidate_id)
             if not candidate:
                 return Response({'error': 'Candidate not found', 'status': status.HTTP_404_NOT_FOUND})
             
