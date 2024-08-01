@@ -63,9 +63,9 @@ class CandidateData(models.Model):
 
     posting = models.ForeignKey(Posting, on_delete=models.CASCADE)
     candidate_profile = models.ForeignKey(CandidateProfile, on_delete=models.CASCADE)
-    resume = models.FileField(upload_to='resumes/', null=True)
     legal_questions = models.JSONField(null=True)
     questions = models.JSONField(null=True)
+    resume = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, choices=status_choices, default='Application Submitted')
 
