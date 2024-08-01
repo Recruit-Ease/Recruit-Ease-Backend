@@ -17,4 +17,5 @@ urlpatterns = [
 
     path('apply/<str:id>/', get_posting_details, name='get-posting-details'),
     path('change_status/', change_status, name='change-status'),
+    path('send_email/', send_email_candidate, name='send-email'),
 ]

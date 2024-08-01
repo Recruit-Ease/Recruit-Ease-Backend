@@ -6,6 +6,10 @@ from .serializers import CompanySerializer
 from .utils import get_company, encrypt, decrypt
 from .models import Company
 from CandidateApp.models import Candidate, CandidateProfile
+from .utils import send_email_update
+from django.template.loader import render_to_string
+from .utils import send_status_update_email
+
 
 @api_view(['POST'])
 def register_view(request):
@@ -233,6 +237,7 @@ def get_application(request):
         company = response
         
         application_id = request.GET.get('application_id')
+        
         posting_id = request.GET.get('posting_id')
         if application_id:
             application = Application.objects.filter(id=decrypt(application_id))
@@ -247,6 +252,9 @@ def get_application(request):
             data.append({
                 'application_id': encrypt(app.id),
                 'posting_id': encrypt(app.posting.id),
+                'company_name': app.posting.company.name,
+                'job_title': app.posting.title,
+                'location': app.posting.company.address,
                 'first_name': candidateProfile.first_name,
                 'last_name': candidateProfile.last_name,
                 'email': app.candidate.email,
@@ -295,6 +303,32 @@ def delete_application(request):
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['POST'])
+def send_email_candidate(request):
+    try:
+        response, isAuthenticated = get_company(request)
+
+        if not isAuthenticated:
+            return Response(response)
+
+        company = response
+        candidate_id = decrypt(request.data.get('id'))
+        candidate = Application.objects.filter(id=candidate_id).first()
+        if not candidate:
+            return Response({'error': 'Candidate not found', 'status': status.HTTP_404_NOT_FOUND})
+
+        subject = request.data.get('subject', 'Application Status Update')
+        message = request.data.get('message', '')
+
+        # Send email to candidate
+        print(candidate.candidate.email)
+        success = send_email_update(candidate.candidate.email, subject, message)
+        if success:
+            return Response({'message': 'Email sent to candidate successfully', 'status': status.HTTP_200_OK})
+
+    except Exception as e:
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+
 @api_view(['PUT'])
 def change_status(request):
     try:
@@ -303,16 +337,31 @@ def change_status(request):
 
             if not isAuthenticated:
                 return Response(response)
-            
+
             company = response
             candidate_id = decrypt(request.data.get('id'))
-            candidate = Application.objects.get(id=candidate_id)
+            candidate = Application.objects.filter(id=candidate_id).first()
+            candidate_profile = CandidateProfile.objects.filter(candidate=candidate.candidate).first()
+            posting = Posting.objects.filter(id=candidate.posting.id).first()
+
             if not candidate:
                 return Response({'error': 'Candidate not found', 'status': status.HTTP_404_NOT_FOUND})
-            
-            candidate.status = request.data.get('status')
+
+            new_status = request.data.get('status')
+            candidate.status = new_status
             candidate.save()
 
-            return Response({'message': 'Candidate status updated successfully', 'status': status.HTTP_200_OK})
+            context = {
+                'company_name': posting.company.name,
+                'first_name': candidate_profile.first_name,
+                'job_title': posting.title,
+            }
+
+            email_successful, response_data = send_status_update_email(candidate, new_status, context)
+
+            if not email_successful:
+                return Response(response_data)
+
+            return Response(response_data)
     except Exception as e:
-        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+        return Response({'error': str(e), 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
