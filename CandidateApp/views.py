@@ -122,6 +122,9 @@ def get_application(request):
             data.append({
                 'application_id': encrypt(app.id),
                 'posting_id': encrypt(app.posting.id),
+                'company_name': app.posting.company.name,
+                'job_title': app.posting.title,
+                'location': app.posting.company.address,
                 'first_name': candidateProfile.first_name,
                 'last_name': candidateProfile.last_name,
                 'email': app.candidate.email,
