@@ -82,7 +82,9 @@ def create_posting(request):
             posting.form_url = f"apply/{encrypt(posting.id)}/"
             posting.save()
 
-            return Response({'message': 'Posting created successfully!', 'status': status.HTTP_201_CREATED})
+            return Response({'message': 'Posting created successfully!',
+                             'posting_link':posting.form_url,
+                             'status': status.HTTP_201_CREATED})
 
         return Response({'error': 'Invalid request method', 'status': status.HTTP_400_BAD_REQUEST})
     except Exception as e:
@@ -125,7 +127,7 @@ def get_postings(request):
                 'nice_to_have': posting.nice_to_have,
                 'other_remarks': posting.other_remarks,
                 'is_active': posting.is_active,
-                'form_url': posting.form_url
+                'posting_link': posting.form_url
             })
 
         if id:
@@ -212,7 +214,7 @@ def get_posting_details(request, id):
             'nice_to_have': posting.nice_to_have,
             'other_remarks': posting.other_remarks,
             'is_active': posting.is_active,
-            'form_url': posting.form_url
+            'posting_link': posting.form_url
         }
 
         return Response({'data': data, 'message': 'Posting Data Received Sucessfully', 'status': status.HTTP_200_OK})
