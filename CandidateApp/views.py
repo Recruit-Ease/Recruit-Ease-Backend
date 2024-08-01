@@ -6,7 +6,7 @@ from .utils import get_candidate
 from RecruiterApp.models import Company
 from .models import Candidate, CandidateProfile
 from RecruiterApp.models import Posting, Application
-from RecruiterApp.utils import decrypt, encrypt
+from RecruiterApp.utils import decrypt, encrypt, send_status_update_email
 
 @api_view(['POST'])
 def register_view(request):
@@ -93,10 +93,13 @@ def save_application(request):
             application.resume = request.data.get('resume')
 
             application.save()
+            send_status_update_email(application, 'Application Submitted', {'candidate_name': cp.first_name, 'posting_title': posting.title, 'company_name': posting.company.name})
 
             return Response({'message': 'Application saved successfully', 'status': status.HTTP_201_CREATED}, status=status.HTTP_201_CREATED)
     except Exception as e:
         print("Error: ", e)
+        # delete the application if any error occurs
+        application.delete()
         return Response({'error': "Internal Server Error", 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # View to get the candidate data for a posting

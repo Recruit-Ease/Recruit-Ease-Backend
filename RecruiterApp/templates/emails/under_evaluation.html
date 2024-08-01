@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Under Evaluation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            color: #2C3E50;
+        }
+        .subheader {
+            text-align: center;
+            color: #2980B9;
+        }
+        a {
+            color: #2980B9;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="header">{{ company_name }}</h1>
+        <h2 class="subheader">Application Under Evaluation</h2>
+        <h3>Hi {{ first_name }},</h3>
+        <p>We wanted to inform you that your application for the position of <strong>{{ job_title }}</strong> at <strong>{{ company_name }}</strong> is currently under evaluation.</p>
+        <p>We appreciate your patience and understanding during this process.</p>
+        <p>For any questions, feel free to reach out to us at <a href="mailto:careers@recruitease.com">careers@recruitease.com</a>.</p>
+        <p>Visit our <a href="https://recruitease.com">website</a> for more information about our company and job opportunities.</p>
+        <p>Best regards,<br>{{ company_name }}<br>Talent Acquisition Manager<br><a href="mailto:HR@recruitease.com">HR@recruitease.com</a></p>
+    </div>
+</body>
+
+</html>
