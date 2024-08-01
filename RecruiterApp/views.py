@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Posting, CandidateData
+from .models import Posting, Application
 from .serializers import CompanySerializer
 from .utils import get_company, encrypt, decrypt
 from .models import Company
@@ -223,25 +223,25 @@ def get_posting_details(request, id):
 
 # View to save the data candidate fills
 @api_view(['POST'])
-def save_candidateData(request):
+def save_application(request):
     try:
         if request.method == 'POST':
             posting_id = decrypt(request.data.get('posting_id'))
             posting = Posting.objects.get(id=posting_id)
-            candidateData = CandidateData.objects.create(posting=posting)
-            candidateData.first_name = request.data.get('first_name')
-            candidateData.last_name = request.data.get('last_name')
-            candidateData.email = request.data.get('email')
-            candidateData.phone = request.data.get('phone')
-            candidateData.address = request.data.get('address')
-            candidateData.city = request.data.get('city')
-            candidateData.province = request.data.get('province')
-            candidateData.country = request.data.get('country')
-            candidateData.postal_code = request.data.get('postal_code')
-            candidateData.resume = request.FILES.get('resume')
-            candidateData.questions = request.data.get('questions')
+            application = Application.objects.create(posting=posting)
+            application.first_name = request.data.get('first_name')
+            application.last_name = request.data.get('last_name')
+            application.email = request.data.get('email')
+            application.phone = request.data.get('phone')
+            application.address = request.data.get('address')
+            application.city = request.data.get('city')
+            application.province = request.data.get('province')
+            application.country = request.data.get('country')
+            application.postal_code = request.data.get('postal_code')
+            application.resume = request.FILES.get('resume')
+            application.questions = request.data.get('questions')
 
-            candidateData.save()
+            application.save()
 
             return Response({'message': 'Candidate data saved successfully', 'status': status.HTTP_201_CREATED})
     except Exception as e:
@@ -249,7 +249,7 @@ def save_candidateData(request):
 
 # View to get the candidate data for a posting
 @api_view(['GET'])
-def get_candidateData(request):
+def get_application(request):
     try:
         response, isAuthenticated = get_company(request)
 
@@ -261,14 +261,14 @@ def get_candidateData(request):
         id = request.GET.get('id')
         posting_id = request.GET.get('posting_id')
         if id:
-            candidateData = CandidateData.objects.filter(id=decrypt(id))
+            application = Application.objects.filter(id=decrypt(id))
         elif posting_id:
-            candidateData = CandidateData.objects.filter(posting_id=decrypt(posting_id))
+            application = Application.objects.filter(posting_id=decrypt(posting_id))
         else:
-            candidateData = CandidateData.objects.filter(posting__company=company)
+            application = Application.objects.filter(posting__company=company)
 
         data = []
-        for candidate in candidateData:
+        for candidate in application:
             data.append({
                 'id': encrypt(candidate.id),
                 'posting_id': encrypt(candidate.posting.id),
@@ -294,7 +294,7 @@ def get_candidateData(request):
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
 
 @api_view(['DELETE'])
-def delete_candidateData(request):
+def delete_application(request):
     try:
         response, isAuthenticated = get_company(request)
 
@@ -310,7 +310,7 @@ def delete_candidateData(request):
             
             for candidate_id in candidateID_list:
                 candidate_id = decrypt(candidate_id)
-                candidate = CandidateData.objects.get(id=candidate_id)
+                candidate = Application.objects.get(id=candidate_id)
                 if not candidate:
                     return Response({'error': 'Candidate not found', 'status': status.HTTP_404_NOT_FOUND})
                 
@@ -331,7 +331,7 @@ def change_status(request):
             
             company = response
             candidate_id = decrypt(request.data.get('id'))
-            candidate = CandidateData.objects.get(id=candidate_id)
+            candidate = Application.objects.get(id=candidate_id)
             if not candidate:
                 return Response({'error': 'Candidate not found', 'status': status.HTTP_404_NOT_FOUND})
             

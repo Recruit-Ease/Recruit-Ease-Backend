@@ -49,7 +49,7 @@ class Posting(models.Model):
     def __str__(self):
         return self.title + "-" + self.posting_date.strftime('%m-%Y')
 
-class CandidateData(models.Model):
+class Application(models.Model):
     status_choices = [
         ("Applicaton Submitted", "Application Submitted"),
         ("Under Review", "Under Review"),
