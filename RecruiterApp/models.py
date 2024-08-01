@@ -1,5 +1,5 @@
 from django.db import models
-from CandidateApp.models import CandidateProfile
+from CandidateApp.models import Candidate
 
 class Company(models.Model):
     name = models.CharField(max_length=255)
@@ -62,7 +62,7 @@ class Application(models.Model):
     ]
 
     posting = models.ForeignKey(Posting, on_delete=models.CASCADE)
-    candidate_profile = models.ForeignKey(CandidateProfile, on_delete=models.CASCADE)
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
     legal_questions = models.JSONField(null=True)
     questions = models.JSONField(null=True)
     resume = models.TextField(null=True)
@@ -70,4 +70,4 @@ class Application(models.Model):
     status = models.CharField(max_length=50, choices=status_choices, default='Application Submitted')
 
     def __str__(self):
-        return self.candidate_profile.first_name + " " + self.candidate_profile.last_name + " - " + self.posting.title
+        return self.candidate.name + " - " + self.posting.title

@@ -66,10 +66,14 @@ def save_application(request):
         if request.method == 'POST':
             posting_id = decrypt(request.data.get('posting_id'))
             posting = Posting.objects.get(id=posting_id)
-            application = Application.objects.create(posting=posting)
+            application = Application.objects.create(posting=posting, candidate=candidate)
+            print("Application: ", application)
+
             candidateProfile = CandidateProfile.objects.filter(candidate=candidate)
+            print("Candidate Profile: ", candidateProfile)
             cp = None
             if candidateProfile.exists():
+                print("Candidate Profile Exists")
                 cp = candidateProfile.first()
             else:
                 cp = CandidateProfile.objects.create(candidate=candidate)
@@ -84,7 +88,6 @@ def save_application(request):
             cp.postal_code = request.data.get('postal_code')
             cp.save()
 
-            application.candidate_profile = cp
             application.legal_questions = request.data.get('legal_questions')
             application.questions = request.data.get('questions')
             application.resume = request.data.get('resume')
@@ -93,6 +96,7 @@ def save_application(request):
 
             return Response({'message': 'Application saved successfully', 'status': status.HTTP_201_CREATED}, status=status.HTTP_201_CREATED)
     except Exception as e:
+        print("Error: ", e)
         return Response({'error': "Internal Server Error", 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # View to get the candidate data for a posting
