@@ -1,4 +1,5 @@
 from django.db import models
+from CandidateApp.models import CandidateProfile
 
 class Company(models.Model):
     name = models.CharField(max_length=255)
@@ -52,24 +53,21 @@ class CandidateData(models.Model):
     status_choices = [
         ("Applicaton Submitted", "Application Submitted"),
         ("Under Review", "Under Review"),
-        ("Accepted", "Accepted"),
-        ("Rejected", "Rejected"),
+        ("Interview Scheduled", "Interview Scheduled"),
+        ("Under Evaluation", "Under Evaluation"),
+        ("Offer Sent", "Offer Sent"),
+        ("Offer Accepted", "Offer Accepted"),
+        ("Offer Declined", "Offer Declined"),
+        ("Not Selected", "Not Selected"),
     ]
 
     posting = models.ForeignKey(Posting, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=255, null=True)
-    last_name = models.CharField(max_length=255, null=True)
-    email = models.EmailField(null=True)
-    phone = models.CharField(max_length=20, null=True)
-    address = models.TextField(null=True)
-    city = models.CharField(max_length=255, null=True)
-    province = models.CharField(max_length=255, null=True)
-    country = models.CharField(max_length=255, null=True)
-    postal_code = models.CharField(max_length=10, null=True)
+    candidate_profile = models.ForeignKey(CandidateProfile, on_delete=models.CASCADE)
     resume = models.FileField(upload_to='resumes/', null=True)
+    legal_questions = models.JSONField(null=True)
     questions = models.JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, choices=status_choices, default='Application Submitted')
 
     def __str__(self):
-        return self.first_name + " " + self.last_names
+        return self.candidate_profile.first_name + " " + self.candidate_profile.last_name + " - " + self.posting.title

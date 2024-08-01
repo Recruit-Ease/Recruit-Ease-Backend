@@ -24,12 +24,15 @@ class Candidate(models.Model):
 
 class CandidateProfile(models.Model):
     candidate = models.OneToOneField(Candidate, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    phone = models.CharField(max_length=15)
-    country = models.CharField(max_length=255)
-    address = models.TextField()
-    short_bio = models.TextField()
+    first_name = models.CharField(max_length=255, null=True)
+    last_name = models.CharField(max_length=255, null=True)
+    phone = models.CharField(max_length=15, null=True)
+    address = models.TextField(null=True)
+    city = models.CharField(max_length=255, null=True)
+    province = models.CharField(max_length=255, null=True)
+    country = models.CharField(max_length=255, null=True)
+    postal_code = models.CharField(max_length=10, null=True)
+    short_bio = models.TextField(null=True)
 
     def __str__(self):
         return self.candidate.name
