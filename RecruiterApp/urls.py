@@ -12,6 +12,8 @@ urlpatterns = [
     path('update_posting/', update_posting, name='update-posting'),
     path('delete_posting/', delete_posting, name='delete-posting'),
 
+    path('applications/', get_application, name='get-applications'),
+
     path('apply/<str:id>/', get_posting_details, name='get-posting-details'),
     path('change_status/', change_status, name='change-status'),
 ]
