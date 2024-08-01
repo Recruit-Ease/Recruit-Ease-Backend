@@ -108,66 +108,41 @@ def get_application(request):
         if not isAuthenticated:
             return Response(response)
         
-        company = response
+        candidate = response
         
-        id = request.GET.get('id')
-        posting_id = request.GET.get('posting_id')
-        if id:
+        application_id = request.GET.get('application_id')
+        if application_id:
             application = Application.objects.filter(id=decrypt(id))
-        elif posting_id:
-            application = Application.objects.filter(posting_id=decrypt(posting_id))
         else:
-            application = Application.objects.filter(posting__company=company)
+            application = Application.objects.filter(candidate=candidate)
 
         data = []
-        for candidate in application:
+        for app in application:
+            candidateProfile = CandidateProfile.objects.get(candidate=app.candidate)
             data.append({
-                'id': encrypt(candidate.id),
-                'posting_id': encrypt(candidate.posting.id),
-                'first_name': candidate.first_name,
-                'last_name': candidate.last_name,
-                'email': candidate.email,
-                'phone': candidate.phone,
-                'address': candidate.address,
-                'city': candidate.city,
-                'province': candidate.province,
-                'country': candidate.country,
-                'postal_code': candidate.postal_code,
-                'resume': candidate.resume.url,
-                'questions': candidate.questions,
-                'created_at': candidate.created_at,
-                'status': candidate.status
+                'application_id': encrypt(app.id),
+                'posting_id': encrypt(app.posting.id),
+                'first_name': candidateProfile.first_name,
+                'last_name': candidateProfile.last_name,
+                'email': app.candidate.email,
+                'phone': candidateProfile.phone,
+                'address': candidateProfile.address,
+                'city': candidateProfile.city,
+                'province': candidateProfile.province,
+                'country': candidateProfile.country,
+                'postal_code': candidateProfile.postal_code,
+                'resume': app.resume,
+                'legal_questions': app.legal_questions,
+                'questions': app.questions,
+                'created_at': app.created_at,
+                'status': app.status
             })
         
-        return Response({'data': data, 'message': 'candidate data received successfully', 'status': status.HTTP_200_OK})
+        if application_id:
+            data = data[0]
+
+        return Response({'data': data, 'message': 'Application Data Received successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
 
     except Exception as e:
         print(e)
-        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
-
-@api_view(['DELETE'])
-def delete_application(request):
-    try:
-        response, isAuthenticated = get_candidate(request)
-
-        if not isAuthenticated:
-            return Response(response)
-        
-        company = response
-        if request.method == 'DELETE':
-            candidateID_list = request.data.get('id')
-
-            if not isinstance(candidateID_list, list):
-                candidateID_list = [candidateID_list]
-            
-            for candidate_id in candidateID_list:
-                candidate_id = decrypt(candidate_id)
-                candidate = Application.objects.get(id=candidate_id)
-                if not candidate:
-                    return Response({'error': 'Candidate not found', 'status': status.HTTP_404_NOT_FOUND})
-                
-                candidate.delete()
-
-            return Response({'message': 'Selected candidates deleted successfully', 'status': status.HTTP_200_OK})
-    except Exception as e:
-        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
