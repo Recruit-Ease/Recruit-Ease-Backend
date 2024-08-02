@@ -248,13 +248,15 @@ def get_recent_postings(request):
         for posting in postings:
             applications = Application.objects.filter(posting=posting)
             num_applicants = applications.count()
+            applied_today = applications.filter(created_at__date=posting.posting_date).count()
             data.append({
                 'posting_id': encrypt(posting.id),
                 'company_name': posting.company.name,
                 'job_title': posting.title,
                 'location': posting.company.address,
-                'posting_date': posting.posting_date,
-                'num_applicants': num_applicants
+                'deadline': posting.expiration_date,
+                'num_applicants': num_applicants,
+                'applied_today': applied_today
             })
 
         return Response({'data': data, 'message': 'Recent Postings Received Successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
