@@ -86,7 +86,6 @@ def save_application(request):
             cp.province = request.data.get('province')
             cp.country = request.data.get('country')
             cp.postal_code = request.data.get('postal_code')
-            cp.short_bio = request.data.get('short_bio')
             cp.save()
 
             application.legal_questions = request.data.get('legal_questions')
@@ -145,7 +144,6 @@ def get_application(request):
                     'province': candidateProfile.province,
                     'country': candidateProfile.country,
                     'postal_code': candidateProfile.postal_code,
-                    'short_bio': candidateProfile.short_bio,
                     'resume': app.resume,
                     'legal_questions': app.legal_questions,
                     'questions': app.questions,
@@ -160,7 +158,7 @@ def get_application(request):
         print(e)
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-@api_view(['POST'])
+
 def save_profile(request):
     try:
         response, isAuthenticated = get_candidate(request)
@@ -169,61 +167,6 @@ def save_profile(request):
             return Response(response)
 
         candidate = response
-        
-        if request.method == 'POST':
-            candidateProfile = CandidateProfile.objects.filter(candidate = candidate)
-
-            if candidateProfile.exists():
-                candidateProfile = candidateProfile.first()
-            else:
-                candidateProfile = CandidateProfile.objects.create(candidate=candidate)
-            
-            candidateProfile.first_name = request.data.get('first_name')
-            candidateProfile.last_name = request.data.get('last_name')
-            candidateProfile.phone = request.data.get('phone')
-            candidateProfile.address = request.data.get('address')
-            candidateProfile.city = request.data.get('city')
-            candidateProfile.province = request.data.get('province')
-            candidateProfile.country = request.data.get('country')
-            candidateProfile.postal_code = request.data.get('postal_code')
-            candidateProfile.short_bio = request.data.get('short_bio')
-            candidateProfile.save()
-
-            return Response({'message': 'Profile Saved Successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
-    
     except Exception as e:
         print(e)
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
-
-@api_view(['GET'])
-def get_profile(request):
-    try:
-        response, isAuthenticated = get_candidate(request)
-
-        if not isAuthenticated:
-            return Response(response)
-
-        candidate = response
-
-        profile = CandidateProfile.objects.filter(candidate = candidate)
-
-        if profile.exists():
-            profile = profile.first()
-            data = {
-                'first_name': profile.first_name,
-                'last_name': profile.last_name,
-                'phone': profile.phone,
-                'address': profile.address,
-                'city': profile.city,
-                'province': profile.province,
-                'country': profile.country,
-                'postal_code': profile.postal_code,
-                'short_bio': profile.short_bio,
-            }
-            return Response({'data': data, 'message': 'Profile Retrived successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
-        else:
-            return Response({'error': 'Profile Not Found', 'status': status.HTTP_404_NOT_FOUND}, status=status.HTTP_404_NOT_FOUND)
-
-    except Exception as e:
-        print(e)
-        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
