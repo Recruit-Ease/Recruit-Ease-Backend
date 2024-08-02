@@ -24,6 +24,12 @@ class Company(models.Model):
         self.refresh_token = str(uuid.uuid4())
         self.save()
 
+class CompanyProfile(models.Model):
+    company = models.ForeignKey(Company,on_delete=models.CASCADE)
+    profile_pic = models.FileField(upload_to='company_profile/',null=True)
+    tagline = models.CharField(max_length=255, null=True)
+    about_us = models.TextField(null=True)
+
 class Posting(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, null=True)

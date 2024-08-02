@@ -18,4 +18,5 @@ urlpatterns = [
     path('apply/<str:id>/', get_posting_details, name='get-posting-details'),
     path('change_status/', change_status, name='change-status'),
     path('send_email/', send_email_candidate, name='send-email'),
+    path('save_profile/', save_profile, name='save_profile')
 ]

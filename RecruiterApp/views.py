@@ -1,10 +1,9 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Posting, Application
+from .models import CompanyProfile, Posting, Application, Company
 from .serializers import CompanySerializer
 from .utils import get_company, encrypt, decrypt
-from .models import Company
 from CandidateApp.models import Candidate, CandidateProfile
 from .utils import send_email_update
 from django.template.loader import render_to_string
@@ -365,3 +364,32 @@ def change_status(request):
             return Response(response_data)
     except Exception as e:
         return Response({'error': str(e), 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+    
+@api_view(['POST'])
+def save_profile(request):
+    try:
+        response, isAuthenticated = get_company(request)
+
+        if not isAuthenticated:
+            return Response(response)
+
+        company = response
+        
+        if request.method == 'POST':
+            companyProfile = CompanyProfile.objects.filter(company = company)
+
+            if companyProfile.exists():
+                companyProfile = companyProfile.first()
+            else:
+                companyProfile = CompanyProfile.objects.create(company=company)
+            
+            companyProfile.profile_pic = request.FILES.get('profile_pic')
+            companyProfile.tagline = request.data.get('tagline')
+            companyProfile.about_us = request.data.get('about_us')
+            companyProfile.save()
+
+            return Response({'message': 'Profile Saved Successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
