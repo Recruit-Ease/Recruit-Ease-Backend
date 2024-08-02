@@ -382,7 +382,7 @@ def save_profile(request):
             else:
                 companyProfile = CompanyProfile.objects.create(company=company)
             
-            companyProfile.profile_pic = request.FILES.get('profile_pic')
+            companyProfile.profile_pic = request.data.get('profile_pic')
             companyProfile.tagline = request.data.get('tagline')
             companyProfile.about_us = request.data.get('about_us')
             companyProfile.save()
@@ -408,7 +408,8 @@ def get_profile(request):
         if profile.exists():
             profile = profile.first()
             data = {
-                'profile_pic': profile.profile_pic.url,
+                'name': company.name,
+                'profile_pic': profile.profile_pic,
                 'tagline': profile.tagline,
                 'about_us': profile.about_us,
             }
