@@ -106,9 +106,11 @@ def get_postings(request):
             postings = Posting.objects.filter(id=decrypt(id))
         else:
             postings = Posting.objects.filter(company=company)
-
+        
         data = []
         for posting in postings:
+            applications = Application.objects.filter(posting=posting)
+            num_applications = applications.count()
             data.append({
                 'id': encrypt(posting.id),
                 'title': posting.title,
@@ -129,7 +131,8 @@ def get_postings(request):
                 'nice_to_have': posting.nice_to_have,
                 'other_remarks': posting.other_remarks,
                 'is_active': posting.is_active,
-                'posting_link': posting.form_url
+                'posting_link': posting.form_url,
+                'num_applications': num_applications
             })
 
         if id:
