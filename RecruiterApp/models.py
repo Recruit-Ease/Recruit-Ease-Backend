@@ -26,7 +26,7 @@ class Company(models.Model):
 
 class CompanyProfile(models.Model):
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
-    profile_pic = models.FileField(upload_to='company_profile/',null=True)
+    profile_pic = models.TextField(null=True)
     tagline = models.CharField(max_length=255, null=True)
     about_us = models.TextField(null=True)
 
