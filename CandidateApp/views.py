@@ -230,3 +230,30 @@ def get_profile(request):
     except Exception as e:
         print(e)
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def get_recent_postings(request):
+    try:
+        response, isAuthenticated = get_candidate(request)
+
+        if not isAuthenticated:
+            return Response(response)
+
+        candidate = response
+
+        postings = Posting.objects.all().order_by('-posting_date')
+
+        data = []
+        for posting in postings:
+            data.append({
+                'posting_id': encrypt(posting.id),
+                'company_name': posting.company.name,
+                'job_title': posting.title,
+                'location': posting.company.address,
+                'posting_date': posting.posting_date
+            })
+
+        return Response({'data': data, 'message': 'Recent Postings Received Successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

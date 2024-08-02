@@ -10,4 +10,5 @@ urlpatterns = [
     path('applications/', get_application, name='get-candidateData'),
     path('save_profile/', save_profile, name='save_profile'),
     path('get_profile/', get_profile, name='get_profile'),
+    path('recent_postings/', get_recent_postings, name='get_recent_postings'),
 ]
