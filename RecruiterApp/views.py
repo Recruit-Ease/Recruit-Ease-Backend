@@ -9,7 +9,6 @@ from .utils import send_email_update
 from django.template.loader import render_to_string
 from .utils import send_status_update_email
 
-
 @api_view(['POST'])
 def register_view(request):
     try:
@@ -390,6 +389,33 @@ def save_profile(request):
 
             return Response({'message': 'Profile Saved Successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
     
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def get_profile(request):
+    try:
+        response, isAuthenticated = get_company(request)
+
+        if not isAuthenticated:
+            return Response(response)
+
+        company = response
+
+        profile = CompanyProfile.objects.filter(company = company)
+
+        if profile.exists():
+            profile = profile.first()
+            data = {
+                'profile_pic': profile.profile_pic.url,
+                'tagline': profile.tagline,
+                'about_us': profile.about_us,
+            }
+            return Response({'data': data, 'message': 'Profile Retrived successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Profile Not Found', 'status': status.HTTP_404_NOT_FOUND}, status=status.HTTP_404_NOT_FOUND)
+
     except Exception as e:
         print(e)
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
