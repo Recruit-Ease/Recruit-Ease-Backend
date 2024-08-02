@@ -81,18 +81,75 @@ def send_status_update_email(candidate, new_status, context):
     }
 
     template_name = templates.get(new_status)
-
+    print(template_name)
     if not template_name:
         return False, {'error': 'Invalid application status provided', 'status': status.HTTP_400_BAD_REQUEST}
 
     email_content = render_to_string(template_name, context)
+    print("sending email")
+    print(candidate.candidate.email)
     email_sent = send_email_update(
         to=candidate.candidate.email,
         subject=f"Application Status Update: {new_status}",
         message=email_content
-    )
+    )  
+    print(email_sent)
 
     if not email_sent:
         return False, {'error': 'Failed to send email', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}
 
     return True, {'message': 'Candidate status updated successfully and email sent', 'status': status.HTTP_200_OK}
+
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.conf import settings
+import io
+import base64
+
+def b64_to_pdf(b64content):
+    try:
+        buffer = io.BytesIO()
+        content = base64.b64decode(b64content)
+        buffer.write(content)
+        buffer.seek(0)  # Move the cursor to the beginning of the buffer
+        return buffer
+    except (TypeError, base64.binascii.Error) as e:
+        print(f"Error decoding base64 content: {e}")
+        return None
+
+def send_email_with_pdf(to_email, b64content, context, subject):
+    # Generate the PDF content as a BytesIO object
+    pdf_buffer = b64_to_pdf(b64content)
+
+    if pdf_buffer is None:
+        return False, {'message': 'Failed to decode PDF content', 'status': '400 Bad Request'}
+
+    # Render the email content
+    template_name = 'emails/offer_sent.html'
+    email_content = render_to_string(template_name, context)
+    
+    # Create the email
+    email = EmailMessage(
+        subject=subject,
+        body=email_content,
+        from_email=settings.EMAIL_HOST_USER,
+        to=[to_email],
+    )
+
+    # Attach the PDF
+    try:
+        pdf_data = pdf_buffer.read()
+        email.attach('Offer Letter.pdf', pdf_data, 'application/pdf')
+    except Exception as e:
+        print(f"Error attaching PDF: {e}")
+        return False, {'message': 'Failed to attach PDF', 'status': '500 Internal Server Error'}
+    finally:
+        pdf_buffer.close()
+
+    # Send the email
+    try:
+        email.send()
+        return True, {'message': 'Offer letter sent successfully', 'status': '200 OK'}
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        return False, {'message': 'Failed to send email', 'status': '500 Internal Server Error'}
