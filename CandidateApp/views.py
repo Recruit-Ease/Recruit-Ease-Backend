@@ -66,6 +66,9 @@ def save_application(request):
         if request.method == 'POST':
             posting_id = decrypt(request.data.get('posting_id'))
             posting = Posting.objects.get(id=posting_id)
+            if Application.objects.filter(candidate=candidate, posting=posting).exists():
+                return Response({'error': 'Candidate has already applied for this posting', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
+            
             application = Application.objects.create(posting=posting, candidate=candidate)
             print("Application: ", application)
 
