@@ -190,6 +190,7 @@ def save_profile(request):
             candidateProfile.country = request.data.get('country')
             candidateProfile.postal_code = request.data.get('postal_code')
             candidateProfile.short_bio = request.data.get('short_bio')
+            candidateProfile.email = candidate.email
             candidateProfile.save()
 
             return Response({'message': 'Profile Saved Successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
@@ -222,6 +223,7 @@ def get_profile(request):
                 'country': profile.country,
                 'postal_code': profile.postal_code,
                 'short_bio': profile.short_bio,
+                'email': candidate.email
             }
             return Response({'data': data, 'message': 'Profile Retrived successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
         else:
