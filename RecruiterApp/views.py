@@ -7,7 +7,8 @@ from .utils import get_company, encrypt, decrypt
 from CandidateApp.models import Candidate, CandidateProfile
 from .utils import send_email_update
 from django.template.loader import render_to_string
-from .utils import send_status_update_email
+from .utils import send_status_update_email, send_email_with_pdf
+from django.utils import timezone
 
 @api_view(['POST'])
 def register_view(request):
@@ -111,6 +112,7 @@ def get_postings(request):
         for posting in postings:
             applications = Application.objects.filter(posting=posting)
             num_applications = applications.count()
+            applied_today = applications.filter(created_at__date=timezone.now().date()).count()
             data.append({
                 'id': encrypt(posting.id),
                 'title': posting.title,
@@ -132,7 +134,8 @@ def get_postings(request):
                 'other_remarks': posting.other_remarks,
                 'is_active': posting.is_active,
                 'posting_link': posting.form_url,
-                'num_applications': num_applications
+                'num_applications': num_applications,
+                'applied_today': applied_today
             })
 
         if id:
@@ -350,6 +353,9 @@ def change_status(request):
 
             new_status = request.data.get('status')
             candidate.status = new_status
+
+            if new_status == 'Offer Sent':
+                candidate.offer = request.data.get('offer')
             candidate.save()
 
             context = {
@@ -357,16 +363,18 @@ def change_status(request):
                 'first_name': candidate_profile.first_name,
                 'job_title': posting.title,
             }
-
-            email_successful, response_data = send_status_update_email(candidate, new_status, context)
-
+            if new_status == 'Offer Sent':
+                email_successful, response_data = send_email_with_pdf(candidate.candidate.email, request.data.get("offer"),  context, 'Welcome to the Team - Offer Letter')
+            else:
+                email_successful, response_data = send_status_update_email(candidate, new_status, context)
             if not email_successful:
-                return Response(response_data)
-
-            return Response(response_data)
+                return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(response_data , status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': str(e), 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
-    
+        candidate.status = 'Under Review'
+        candidate.save()
+        return Response({'error': str(e), 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['POST'])
 def save_profile(request):
     try:

@@ -74,6 +74,7 @@ class Application(models.Model):
     resume = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, choices=status_choices, default='Application Submitted')
+    offer = models.TextField(null=True)
 
     def __str__(self):
         return self.candidate.name + " - " + self.posting.title
