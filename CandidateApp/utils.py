@@ -1,5 +1,5 @@
 from rest_framework import status
-from .models import Candidate
+from .models import Candidate, Candidatetoken
 
 def get_candidate(request):
     try:
@@ -9,7 +9,8 @@ def get_candidate(request):
             return ({'error': 'Authorization token not provided', 'status':status.HTTP_400_BAD_REQUEST}, False)
         
         try:
-            candidate = Candidate.objects.get(refresh_token=token)
+            token_entry = Candidatetoken.objects.get(token=token, is_valid=True)
+            candidate = token_entry.candidate
             return (candidate, True)
         except Candidate.DoesNotExist:
             return ({'error': 'Invalid Token', 'status': status.HTTP_400_BAD_REQUEST}, False)

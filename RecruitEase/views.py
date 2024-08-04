@@ -31,11 +31,12 @@ def company_login_view(request):
             return Response({'error': 'Invalid Email Address', 'status': status.HTTP_400_BAD_REQUEST})
         
         if user.check_password(password):
-            user.generate_refresh_token()
-            return Response({'refresh_token': user.refresh_token, 'is_company': is_company, 'name': user.name, 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+            new_token = user.generate_refresh_token()
+            return Response({'refresh_token': new_token, 'is_company': is_company, 'name': user.name, 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid Credentials', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
+        print(e)
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])

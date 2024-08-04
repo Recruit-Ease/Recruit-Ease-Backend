@@ -4,7 +4,7 @@ from rest_framework import status
 from .serializers import CandidateSerializer
 from .utils import get_candidate
 from RecruiterApp.models import Company
-from .models import Candidate, CandidateProfile
+from .models import Candidate, CandidateProfile, Candidatetoken
 from RecruiterApp.models import Posting, Application
 from RecruiterApp.utils import decrypt, encrypt, send_status_update_email
 
@@ -18,10 +18,21 @@ def register_view(request):
         serializer = CandidateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            # Save Profile
+            name = request.data.get('name')
+            name = name.split(' ')
+            first_name = name[0]
+            last_name = name[1] if len(name) > 1 else ''
+            CandidateProfile.objects.create(
+                candidate=serializer.instance,
+                first_name=first_name,
+                last_name=last_name
+            )
             return Response({'data': serializer.data, 'message': 'Candidate registered successfully', 'status': status.HTTP_201_CREATED}, status=status.HTTP_201_CREATED)
         
         return Response({'error': serializer.errors, 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
+        print(e)
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
@@ -33,8 +44,8 @@ def logout_view(request):
             return Response(response)
 
         candidate = response
-        candidate.refresh_token = None
-        candidate.save()
+        token = request.headers.get('Authorization')
+        Candidatetoken.objects.filter(token = token).delete()
         return Response({'message': 'Logged out successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -133,6 +144,7 @@ def get_application(request):
             data = []
             for app in application:
                 candidateProfile = CandidateProfile.objects.get(candidate=app.candidate)
+                print("Candidate Profile: ", candidateProfile)
                 data.append({
                     'application_id': encrypt(app.id),
                     'posting_id': encrypt(app.posting.id),
@@ -157,12 +169,12 @@ def get_application(request):
                 })
             return Response({'data': data, 'message': 'Application Data Received successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
         else:
-            return Response({'error': 'No applications found', 'status': status.HTTP_404_NOT_FOUND}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'data': [], 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
 
     except Exception as e:
         print(e)
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
 @api_view(['POST'])
 def save_profile(request):
     try:
@@ -258,7 +270,8 @@ def get_recent_postings(request):
                 'num_applicants': num_applicants,
                 'applied_today': applied_today
             })
-
+        if(len(data) == 0):
+            return Response({'error': 'No Postings Found', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
         return Response({'data': data, 'message': 'Recent Postings Received Successfully', 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
     except Exception as e:
         print(e)

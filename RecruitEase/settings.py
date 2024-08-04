@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ju#@b-z7f)=ufeemd#t^#u+5jt7$@4d6mhb8whc^mn(wi4@(z('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # Application definition
 
@@ -53,33 +53,43 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-     'http://localhost:5173',
+    "https://https://recruitease-prod.vercel.app",  # Replace with your actual production domain
+    "https://recruitease-prod.netlify.app",
+    "https://recruitease-dev.netlify.app",
+    'http://localhost:5173',
 ]
 
+ALLOWED_HOSTS = [
+    "recruitease-prod.vercel.app",
+    "recruitease-prod.netlify.app",
+    "recruitease-dev.netlify.app",
+    'localhost',
+]  # Replace with your actual production domain
 
 CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'PATCH',
-    'POST',
-    'PUT',
+    "DELETE",
+    "GET",
+    "PATCH",
+    "POST",
+    "PUT",
+    "OPTIONS",
 ]
 
 CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with'
-    'Refresh_token',
+    "accept",
+    "accept-encoding",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "Refresh_token",
+    "Authorization",
 ]
 
 

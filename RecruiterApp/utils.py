@@ -1,4 +1,4 @@
-from RecruiterApp.models import Company
+from RecruiterApp.models import Company, Tokens
 from rest_framework import status
 from django.core import signing
 
@@ -33,14 +33,24 @@ def get_company(request):
             )
 
         try:
-            company = Company.objects.get(refresh_token=token)
-            return (company, True)
+            token_entry = Tokens.objects.get(token=token, is_valid=True)
+            email = token_entry.email
+            print(email)
+            try:
+                company = Company.objects.get(email=email)
+                return (company, True)
+            except Company.DoesNotExist:
+                return (
+                    {"error": "Invalid Token", "status": status.HTTP_400_BAD_REQUEST},
+                    False,
+                )
         except Company.DoesNotExist:
             return (
                 {"error": "Invalid Token", "status": status.HTTP_400_BAD_REQUEST},
                 False,
             )
     except Exception as e:
+        print(e)
         return (
             {
                 "error": "Internal Server Error",

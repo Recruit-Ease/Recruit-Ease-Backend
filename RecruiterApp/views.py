@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import CompanyProfile, Posting, Application, Company
+from .models import CompanyProfile, Posting, Application, Company, Tokens
 from .serializers import CompanySerializer
 from .utils import get_company, encrypt, decrypt
 from CandidateApp.models import Candidate, CandidateProfile
@@ -20,6 +20,11 @@ def register_view(request):
         serializer = CompanySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            CompanyProfile.objects.create(
+                company=serializer.instance,
+                tagline=serializer.instance.name + ' - We are hiring!',
+                about_us='We are a company looking for talented individuals to join our team. If you are passionate about technology and innovation, we would love to have you onboard with us.'
+            )
             return Response({'data': serializer.data, 'message': 'Company registered successfully', 'status': status.HTTP_201_CREATED})
         
         return Response({'error': serializer.errors, 'status': status.HTTP_400_BAD_REQUEST})
@@ -35,8 +40,8 @@ def logout_view(request):
             return Response(response)
 
         company = response
-        company.refresh_token = None
-        company.save()
+        token = request.headers.get('Authorization')
+        Tokens.objects.filter(token=token).delete()
         return Response({'message': 'Logged out successfully', 'status': status.HTTP_200_OK})
     except Exception as e:
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
@@ -143,6 +148,7 @@ def get_postings(request):
 
         return Response({'data': data, 'message': 'Postings Received Successfully', 'status': status.HTTP_200_OK})
     except Exception as e:
+        print(e,"error")
         return Response({'error': 'Internal Server Error', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
 
 @api_view(['PUT'])
@@ -373,6 +379,7 @@ def change_status(request):
     except Exception as e:
         candidate.status = 'Under Review'
         candidate.save()
+        print(e)
         return Response({'error': str(e), 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
